@@ -13,7 +13,7 @@ class YodaPrototype:
         self.target_col = target_col
         self.app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
         self.children = [html.H1('Yoda', style={'textAlign': 'center'})]
-        self.feedback_sever = "http://127.0.0.1:5000/feedback/"
+        self.feedback_sever = "http://77.125.86.248:8888/"
         if overview:
             self.uni_variable()
         if explored_variable is not None:
