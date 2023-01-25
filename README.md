@@ -5,7 +5,7 @@ This is a Dash app that allows for uni-variable, bi-variables and multi-variable
 ## Getting Started
 These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
-##### Prerequisites
+### Prerequisites
 You will need the following packages to run this app:
 
 dash==1.21.1
@@ -17,6 +17,7 @@ dash-table==4.12.0
 plotly==4.13.0
 pandas==1.2.5
 requests==2.25.0
+
 You can install these packages by running pip install -r requirements.txt
 
 ## Running the app
