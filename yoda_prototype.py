@@ -126,7 +126,7 @@ class YodaPrototype:
                               self.dataframe.duplicated().sum(),
                               round(self.dataframe.duplicated().sum() / self.dataframe.shape[0], 2)
                               ]}
-        overview = pd.self.dataframe(overview)
+        overview = pd.DataFrame(overview)
         self.children.append(dbc.Container([dash_table.DataTable(
             overview.to_dict('records'), [{"name": i, "id": i} for i in overview.columns], id='overview',
             style_cell={'textAlign': 'left', 'minWidth': '0px', 'maxWidth': '180px', 'whiteSpace': 'normal'},
@@ -214,7 +214,7 @@ class YodaPrototype:
                                               1:5].to_dict()),
                                           str(self.dataframe.corr()[col].sort_values(ascending=False)[-5:].to_dict())
                                           ])
-            col_data = pd.self.dataframe(col_data)
+            col_data = pd.DataFrame(col_data)
             self.children.append(dbc.Container([dash_table.DataTable(
                 col_data.to_dict('records'), [{"name": i, "id": i} for i in col_data.columns], id='col_data_' + col,
                 style_cell={'textAlign': 'left', 'minWidth': '0px', 'maxWidth': '180px', 'whiteSpace': 'normal'},
@@ -253,10 +253,14 @@ class YodaPrototype:
 
     def correlation_heatmap(self):
         self.children.append(html.H2('Multi-Variables Exploration', style={'textAlign': 'center'}))
-        df_mask = round(self.dataframe.corr(), 2)
-        fig = ff.create_annotated_heatmap(z=df_mask.to_numpy(), x=df_mask.columns.tolist(), y=df_mask.columns.tolist(),
-                                          colorscale=px.colors.diverging.RdBu, hoverinfo="none", showscale=True, ygap=1,
-                                          xgap=1)
+        df_mask = round(self.dataframe.corr(numeric_only=True), 2)
+
+        fig = ff.create_annotated_heatmap(z=df_mask.to_numpy(),
+                                          x=df_mask.columns.tolist(),
+                                          y=df_mask.columns.tolist(),
+                                          colorscale=px.colors.diverging.RdBu,
+                                          showscale=True, ygap=1, xgap=1
+                                          )
         fig.update_xaxes(side="bottom")
         fig.update_layout(title_text='Heatmap', title_x=0.5, height=1000, xaxis_showgrid=False, yaxis_showgrid=False,
                           xaxis_zeroline=False, yaxis_zeroline=False, yaxis_autorange='reversed', template='seaborn')
@@ -273,5 +277,5 @@ class YodaPrototype:
 
         self.app.layout = html.Div(children=self.children)
 
-        if __name__ == '__main__':
-            self.app.run_server(debug=False, host='0.0.0.0')
+        while(True):
+            self.app.run_server(debug=True)
