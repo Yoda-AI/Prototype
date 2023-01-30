@@ -13,7 +13,7 @@ class YodaPrototype:
         self.target_col = target_col
         self.app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
         self.children = [html.H1('Yoda', style={'textAlign': 'center'})]
-        self.feedback_sever = "http://77.125.86.248:8888/"
+        self.feedback_sever = "http://192.168.0.208:8888/feedback/"
         if overview:
             self.uni_variable()
         if explored_variable is not None:
@@ -210,7 +210,7 @@ class YodaPrototype:
                                           (self.dataframe[col] < self.dataframe[col].quantile(0.05)).sum(),
                                           round(((self.dataframe[col] < self.dataframe[col].quantile(0.05)).sum() / len(
                                               self.dataframe)) * 100, 2),
-                                          str(self.dataframe.corr()['quality'].sort_values(ascending=False)[
+                                          str(self.dataframe.corr()[col].sort_values(ascending=False)[
                                               1:5].to_dict()),
                                           str(self.dataframe.corr()[col].sort_values(ascending=False)[-5:].to_dict())
                                           ])
