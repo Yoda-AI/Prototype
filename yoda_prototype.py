@@ -9,6 +9,9 @@ import plotly.figure_factory as ff
 class YodaPrototype:
     def __init__(self, dataframe, overview=True, multi=True, explored_variable=None, target_col=None):
         self.dataframe = dataframe
+        self.date_analysis()
+        self.categorical = dataframe[dataframe.select_dtypes(include = ["object"]).keys()]
+        self.numerical = dataframe[dataframe.select_dtypes(include = ["int64", "float64"]).keys()]
         self.explored_variable = explored_variable
         self.target_col = target_col
         self.app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
@@ -88,27 +91,41 @@ class YodaPrototype:
                             url=self.feedback_sever + f"Error with {func.__name__} {i} and {self.explored_variable}",
                             method='Get')
 
+    def date_analysis(self):
+        columns = self.dataframe.columns
+        for col in columns:
+            if "Date" in col or "date" in col or "time" in col or "Time" in col:
+                try:
+                    self.dataframe[col] = pd.to_datetime(self.dataframe[col], utc=True)
+                    self.dataframe[col + ' year'] = self.dataframe[col].dt.year
+                    self.dataframe[col + ' month'] = self.dataframe[col].dt.month
+                    self.dataframe[col + ' day'] = self.dataframe[col].dt.day
+                    self.dataframe[col + ' hour'] = self.dataframe[col].dt.hour
+                except:
+                    pass
+
+
     def multi_variable(self):
         self.correlation_heatmap()
 
         if self.target_col is not None:
             self.children.append(
-                html.Div([dcc.Dropdown(id="dropdown", options=self.dataframe.columns.drop(self.target_col),
-                                       value=self.dataframe.columns.drop(self.target_col), multi=True),
+                html.Div([dcc.Dropdown(id="dropdown", options=self.numerical.columns.drop(self.target_col),
+                                       value=self.numerical.columns.drop(self.target_col), multi=True),
                           dcc.Graph(id="graph")]))
 
             @self.app.callback(Output("graph", "figure"), Input("dropdown", "value"))
             def update_bar_chart(dims):
-                fig = px.scatter_matrix(self.dataframe, dimensions=dims, color=self.target_col, height=1500)
+                fig = px.scatter_matrix(self.numerical, dimensions=dims, color=self.target_col, height=1500)
                 return fig
         else:
             self.children.append(html.Div(
-                [dcc.Dropdown(id="dropdown", options=self.dataframe.columns, value=self.dataframe.columns, multi=True),
+                [dcc.Dropdown(id="dropdown", options=self.numerical.columns, value=self.numerical.columns, multi=True),
                  dcc.Graph(id="graph")]))
 
             @self.app.callback(Output("graph", "figure"), Input("dropdown", "value"))
             def update_bar_chart(dims):
-                fig = px.scatter_matrix(self.dataframe, dimensions=dims, height=1500)
+                fig = px.scatter_matrix(self.numerical, dimensions=dims, height=1500)
                 return fig
         self.parallel_coordinates()
 
@@ -121,20 +138,15 @@ class YodaPrototype:
                     'Value': [self.dataframe.shape[1],
                               self.dataframe.shape[0],
                               self.dataframe.isnull().sum().sum(),
-                              round(self.dataframe.isnull().sum().sum() / (
-                                          self.dataframe.shape[0] * self.dataframe.shape[1]), 2),
+                              round(self.dataframe.isnull().sum().sum() / (self.dataframe.shape[0] * self.dataframe.shape[1]), 2),
                               self.dataframe.duplicated().sum(),
                               round(self.dataframe.duplicated().sum() / self.dataframe.shape[0], 2)
                               ]}
         overview = pd.DataFrame(overview)
-        self.children.append(dbc.Container([dash_table.DataTable(
-            overview.to_dict('records'), [{"name": i, "id": i} for i in overview.columns], id='overview',
-            style_cell={'textAlign': 'left', 'minWidth': '0px', 'maxWidth': '180px', 'whiteSpace': 'normal'},
-        )]))
+        self.children.append(dbc.Container([dash_table.DataTable(overview.to_dict('records'), [{"name": i, "id": i} for i in overview.columns], id='overview',
+            style_cell={'textAlign': 'left', 'minWidth': '0px', 'maxWidth': '180px', 'whiteSpace': 'normal'})]))
         self.children.append(html.H3(children='Data Table'))
-        self.children.append(dbc.Container([
-
-            dash_table.DataTable(self.dataframe.to_dict('records'),
+        self.children.append(dbc.Container([dash_table.DataTable(self.dataframe.to_dict('records'),
                                  [{"name": i, "id": i} for i in self.dataframe.columns], id='datatable-row-ids',
                                  page_size=20, filter_action="native",
                                  filter_options={"placeholder_text": "Filter column..."}, sort_action="native",
@@ -156,7 +168,7 @@ class YodaPrototype:
                     ['Mean', 'Median', 'Standard Deviation', 'Minimum', 'Maximum', 'Range', 'Variance', 'Skewness',
                      'Kurtosis',
                      'Monotonicity (increasing)', 'Monotonicity (decreasing)', 'Median Absolute Deviation',
-                     'Coefficient of Variation', 'Interquartile Range (IQR)', 'Interquartile Range (IQR) (%)',
+                      'Interquartile Range (IQR)',
                      'Quantile 0.25', 'Quantile 0.75', '5th Percentile', '95th Percentile', 'Number of zeros',
                      'Zeros (%)', 'Imbalanced', 'Imbalanced (%)',
                      'Number of negative values', 'Negative values (%)', 'Number of positive values',
@@ -175,10 +187,7 @@ class YodaPrototype:
                                           self.dataframe[col].is_monotonic_increasing,
                                           self.dataframe[col].is_monotonic_decreasing,
                                           round((self.dataframe[col] - self.dataframe[col].mean()).abs().mean(), 2),
-                                          round(self.dataframe[col].std() / self.dataframe[col].mean(), 2),
                                           self.dataframe[col].quantile(0.75) - self.dataframe[col].quantile(0.25),
-                                          round(((self.dataframe[col].quantile(0.75) - self.dataframe[col].quantile(
-                                              0.25)) / self.dataframe[col].mean()) * 100, 2),
                                           self.dataframe[col].quantile(0.25), self.dataframe[col].quantile(0.75),
                                           self.dataframe[col].quantile(0.05), self.dataframe[col].quantile(0.95),
                                           (self.dataframe[col] == 0).sum(),
@@ -210,10 +219,14 @@ class YodaPrototype:
                                           (self.dataframe[col] < self.dataframe[col].quantile(0.05)).sum(),
                                           round(((self.dataframe[col] < self.dataframe[col].quantile(0.05)).sum() / len(
                                               self.dataframe)) * 100, 2),
-                                          str(self.dataframe.corr()[col].sort_values(ascending=False)[
-                                              1:5].to_dict()),
-                                          str(self.dataframe.corr()[col].sort_values(ascending=False)[-5:].to_dict())
+                                          str(self.dataframe.corr(numeric_only=True)[col].sort_values(ascending=False)[1:5].to_dict()),
+                                          str(self.dataframe.corr(numeric_only=True)[col].sort_values(ascending=False)[-5:].to_dict())
                                           ])
+                if round(self.dataframe[col].mean(), 2) != 0:
+                    col_data['Name'].extend(['Coefficient of Variation','Interquartile Range (IQR) (%)'])
+                    col_data['Value'].extend([round(round(self.dataframe[col].std(),2) / round(self.dataframe[col].mean(), 2),2),
+                                             round(((self.dataframe[col].quantile(0.75) - self.dataframe[col].quantile(0.25)) / self.dataframe[col].mean()) * 100, 2)])
+
             col_data = pd.DataFrame(col_data)
             self.children.append(dbc.Container([dash_table.DataTable(
                 col_data.to_dict('records'), [{"name": i, "id": i} for i in col_data.columns], id='col_data_' + col,
@@ -221,7 +234,7 @@ class YodaPrototype:
                 style_data_conditional=[
                     {
                         'if': {
-                            'filter_query': '{Name} = "Standard Deviation" && {Value} >2',
+                            'filter_query': '{Name} = "Median Absolute Deviation" && {Value} >2',
                             'column_id': 'Value'
                         },
                         'backgroundColor': 'tomato',
@@ -245,22 +258,22 @@ class YodaPrototype:
                         'color': 'white'
                     }
                 ])]))
-            fig_hist = px.histogram(self.dataframe, x=col)
-            fig_box = px.box(self.dataframe, x=col)
-            self.children.append(html.Div([html.Div([
-                html.Div([dcc.Graph(figure=fig_hist)], className="nine columns"),
-                html.Div([dcc.Graph(figure=fig_box)], className="ten columns")], className="row")]))
+            if col in self.numerical.columns:
+                fig_hist = px.histogram(self.dataframe, x=col)
+                fig_box = px.box(self.dataframe, x=col)
+                self.children.append(html.Div([html.Div([
+                    html.Div([dcc.Graph(figure=fig_hist)], className="nine columns"),
+                    html.Div([dcc.Graph(figure=fig_box)], className="ten columns")], className="row")]))
 
     def correlation_heatmap(self):
         self.children.append(html.H2('Multi-Variables Exploration', style={'textAlign': 'center'}))
-        df_mask = round(self.dataframe.corr(numeric_only=True), 2)
+        df_mask = round(self.numerical.corr(numeric_only=True), 2)
 
         fig = ff.create_annotated_heatmap(z=df_mask.to_numpy(),
                                           x=df_mask.columns.tolist(),
                                           y=df_mask.columns.tolist(),
                                           colorscale=px.colors.diverging.RdBu,
-                                          showscale=True, ygap=1, xgap=1
-                                          )
+                                          showscale=True, ygap=1, xgap=1)
         fig.update_xaxes(side="bottom")
         fig.update_layout(title_text='Heatmap', title_x=0.5, height=1000, xaxis_showgrid=False, yaxis_showgrid=False,
                           xaxis_zeroline=False, yaxis_zeroline=False, yaxis_autorange='reversed', template='seaborn')
@@ -270,7 +283,7 @@ class YodaPrototype:
         self.children.append(dcc.Graph(id='fig_heatmap_2', figure=fig))
 
     def parallel_coordinates(self):
-        fig = px.parallel_coordinates(self.dataframe, color=self.target_col)
+        fig = px.parallel_coordinates(self.numerical, color=self.target_col)
         self.children.append(dcc.Graph(id='fig_parallel_coordinates', figure=fig))
 
     def run(self):
