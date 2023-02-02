@@ -1,40 +1,40 @@
 # Yoda Prototype
 
-This is a Dash app that allows for uni-variable, bi-variables and multi-variable exploration of data using plotly.express library. The app takes in a dataframe, an explored variable and a target column and generates box plots, histograms, and violin plots of the explored variable against all other columns in the dataframe.
+Smooth your way from data to knowledge with Yoda Prototype!
+
+This exciting Dash app allows you to dive deep into your data and uncover hidden patterns and relationships. With Yoda Prototype, you can easily create uni-variable, bi-variable, and multi-variable visualizations with just a few clicks.
+
+If you looking to better understand your data, Yoda Prototype is the perfect tool for you.
+
 
 ## Getting Started
-These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
+Ready to explore your data like never before? Follow these simple steps to get started:
 
-### Prerequisites
-You will need the following packages to run this app:
+Install the required packages by running pip install -r requirements.txt in the command line.
+Run the app by executing python <your_file_name>.py in the command line.
+Open your web browser and go to http://127.0.0.1:8050/.
+Upload your data and watch as Yoda Prototype generates stunning box plots, histograms, and violin plots in just seconds!
 
-dash==1.21.1
-dash-bootstrap-components==0.11.1
-dash-core-components==1.11.1
-dash-html-components==1.1.1
-dash-renderer==1.5.1
-dash-table==4.12.0
-plotly==4.13.0
-pandas==1.2.5
-requests==2.25.0
 
-You can install these packages by running pip install -r requirements.txt
+### Built with the Best
+Yoda Prototype is built with the latest and greatest technologies, including:
 
-## Running the app
-To run the app, you will need to execute the code in the command line.
-python <your_file_name>.py
-Then, open your web browser and go to http://127.0.0.1:8050/
+[Dash]([url](https://dash.plotly.com/)), a web framework for building analytical apps
+[Plotly]([url](https://plotly.com/)), a data visualization library
+[Pandas]([url](https://pandas.pydata.org/)), a data manipulation library
+[Requests]([url](https://docs.python-requests.org/en/latest/)), an HTTP library
 
-## Built With
-Dash - The web framework used
-Plotly - Data visualization library
-Pandas - Data manipulation library
-requests - HTTP library
-Author
-Your name - Your Github profile
-Acknowledgments
-Thanks to the Dash and Plotly communities for their support and tutorials.
-Inspiration from Bi-variables Exploration Dashboard
 
-## Feedback
-The app includes buttons for sending feedback on the usefulness of the generated plots. These buttons send a GET request to http://Yoda-AI/feedback/ along with the id of the button clicked. You can use this endpoint to record the feedback in a database or log file.
+## Join the Yoda Community
+We're always looking for ways to make Yoda Prototype even better. Whether you have feedback, suggestions, or just want to chat, we'd love to hear from you! You can reach us at info@yoda-ai.com.
+
+And if you're feeling adventurous, why not contribute to the project? We're always looking for passionate individuals who want to help us improve Yoda Prototype. So what are you waiting for? Get involved today!
+
+
+## Acknowledgments
+We'd like to extend a huge thank you to the Dash and Plotly communities for their support and tutorials. Yoda Prototype wouldn't be possible without their contributions.
+
+
+## Author
+[Chen Raccah]([url](https://github.com/chenraccah))  Co-Founder & CTO - Yoda
+
