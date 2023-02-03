@@ -104,7 +104,6 @@ class YodaPrototype:
                 except:
                     pass
 
-
     def multi_variable(self):
         self.correlation_heatmap()
 
@@ -234,7 +233,7 @@ class YodaPrototype:
                 style_data_conditional=[
                     {
                         'if': {
-                            'filter_query': '{Name} = "Median Absolute Deviation" && {Value} >2',
+                            'filter_query': '{Name} = "Median Absolute Deviation" && {Value} >=2',
                             'column_id': 'Value'
                         },
                         'backgroundColor': 'tomato',
@@ -256,6 +255,15 @@ class YodaPrototype:
                         },
                         'backgroundColor': 'tomato',
                         'color': 'white'
+                    },
+
+                    {
+                        'if': {
+                            'filter_query': '({Name} = "Zeros (%)" && {Value} >90)',
+                            'column_id': 'Value'
+                        },
+                        'backgroundColor': 'tomato',
+                        'color': 'white'
                     }
                 ])]))
             if col in self.numerical.columns:
@@ -264,6 +272,22 @@ class YodaPrototype:
                 self.children.append(html.Div([html.Div([
                     html.Div([dcc.Graph(figure=fig_hist)], className="nine columns"),
                     html.Div([dcc.Graph(figure=fig_box)], className="ten columns")], className="row")]))
+            elif col in self.categorical.columns:
+                table = pd.DataFrame(self.dataframe[col].value_counts(dropna=False))
+                table['index'] = table.index
+                self.children.append(dbc.Container([dash_table.DataTable(table.to_dict('records'),
+                                                                         [{"name": i, "id": i} for i in table.columns],
+                                                                         id='datatable-row-ids'+ col,
+                                                                         page_size=20, filter_action="native",
+                                                                         filter_options={
+                                                                             "placeholder_text": "Filter column..."},
+                                                                         sort_action="native",
+                                                                         sort_mode="multi", column_selectable="single",
+                                                                         selected_columns=[], selected_rows=[],
+                                                                         page_action="native", page_current=0)]))
+                fig_bar = px.bar(table, y=col)
+                self.children.append(html.Div([html.Div([
+                        html.Div([dcc.Graph(figure=fig_bar)], className="nine columns")], className="row")]))
 
     def correlation_heatmap(self):
         self.children.append(html.H2('Multi-Variables Exploration', style={'textAlign': 'center'}))
