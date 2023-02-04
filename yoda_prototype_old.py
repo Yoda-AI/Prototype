@@ -39,6 +39,7 @@ class YodaPrototype:
                     try:
                         fig = func(self.dataframe, x=self.explored_variable, y=i, color=self.target_col,
                                    title=f"{func.__name__} {self.explored_variable} and {i}")
+                        print(fig)
                         self.children.append(dcc.Graph(
                             id='fig_' + str(func.__name__) + str(counter) + str(i) + str(self.explored_variable),
                             figure=fig))
@@ -144,6 +145,7 @@ class YodaPrototype:
         overview = pd.DataFrame(overview)
         self.children.append(dbc.Container([dash_table.DataTable(overview.to_dict('records'), [{"name": i, "id": i} for i in overview.columns], id='overview',
             style_cell={'textAlign': 'left', 'minWidth': '0px', 'maxWidth': '180px', 'whiteSpace': 'normal'})]))
+            
         self.children.append(html.H3(children='Data Table'))
         self.children.append(dbc.Container([dash_table.DataTable(self.dataframe.to_dict('records'),
                                  [{"name": i, "id": i} for i in self.dataframe.columns], id='datatable-row-ids',
@@ -218,8 +220,8 @@ class YodaPrototype:
                                           (self.dataframe[col] < self.dataframe[col].quantile(0.05)).sum(),
                                           round(((self.dataframe[col] < self.dataframe[col].quantile(0.05)).sum() / len(
                                               self.dataframe)) * 100, 2),
-                                          str(self.dataframe.corr(numeric_only=True)[col].sort_values(ascending=False)[1:5].to_dict()),
-                                          str(self.dataframe.corr(numeric_only=True)[col].sort_values(ascending=False)[-5:].to_dict())
+                                          str(self.dataframe.corr()[col].sort_values(ascending=False)[1:5].to_dict()),
+                                          str(self.dataframe.corr()[col].sort_values(ascending=False)[-5:].to_dict())
                                           ])
                 if round(self.dataframe[col].mean(), 2) != 0:
                     col_data['Name'].extend(['Coefficient of Variation','Interquartile Range (IQR) (%)'])
@@ -291,7 +293,7 @@ class YodaPrototype:
 
     def correlation_heatmap(self):
         self.children.append(html.H2('Multi-Variables Exploration', style={'textAlign': 'center'}))
-        df_mask = round(self.numerical.corr(numeric_only=True), 2)
+        df_mask = round(self.numerical.corr(), 2)
 
         fig = ff.create_annotated_heatmap(z=df_mask.to_numpy(),
                                           x=df_mask.columns.tolist(),
