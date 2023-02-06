@@ -7,9 +7,10 @@ import plotly.figure_factory as ff
 from consts import *
 
 class MultiVariable(object):
-    def __init__(self, yoda_env, dataframe):
+    def __init__(self, yoda_env, dataframe, app):
         self.yoda_env = yoda_env
         self.dataframe = dataframe
+        self.app = app
 
     def prepare(self):
         self.df_mask = round(self.yoda_env.numerical.corr(), 2)
@@ -38,13 +39,13 @@ class MultiVariable(object):
         if self.yoda_env.target_col is not None:
             elements.append(html.Div([dcc.Dropdown(id="dropdown", options=self.yoda_env.numerical.columns.drop(self.yoda_env.target_col), value=self.yoda_env.numerical.columns.drop(self.target_col), multi=True), dcc.Graph(id="graph")]))
 
-            @self.yoda_env.app.callback(Output("graph", "figure"), Input("dropdown", "value"))
+            @self.app.callback(Output("graph", "figure"), Input("dropdown", "value"))
             def update_bar_chart(dims):
                 return px.scatter_matrix(self.yoda_env.numerical, dimensions=dims, color=self.yoda_env.target_col, height=1500)
         else:
             elements.append(html.Div([dcc.Dropdown(id="dropdown", options=self.yoda_env.numerical.columns, value=self.yoda_env.numerical.columns, multi=True), dcc.Graph(id="graph")]))
 
-            @self.yoda_env.app.callback(Output("graph", "figure"), Input("dropdown", "value"))
+            @self.app.callback(Output("graph", "figure"), Input("dropdown", "value"))
             def update_bar_chart(dims):
                 return px.scatter_matrix(self.yoda_env.numerical, dimensions=dims, height=1500)
 

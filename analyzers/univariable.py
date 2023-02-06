@@ -7,9 +7,10 @@ import plotly.figure_factory as ff
 from consts import *
 
 class UniVariable(object):
-    def __init__(self, yoda_env, dataframe):
+    def __init__(self, yoda_env, dataframe, app):
         self.yoda_env = yoda_env
         self.dataframe = dataframe
+        self.app = app
 
     def prepare(self):
         RESOLVER = lambda resolver,arg : [resolver[k](*arg) for k in resolver.keys()]

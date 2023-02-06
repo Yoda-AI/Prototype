@@ -6,6 +6,10 @@ import requests
 import plotly.figure_factory as ff
 import threading
 
+from flask import Flask, render_template
+from werkzeug.middleware.dispatcher import DispatcherMiddleware
+from werkzeug.serving import run_simple
+
 from consts import *
 from mutators.DateMutator import DateMutator
 
@@ -31,16 +35,34 @@ class Yoda:
         self.feedback_sever = "http://77.125.86.248:8888/feedback/"
 
     def init_webapp(self):
-        self.app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL])
+        self.app_flask = Flask(__name__)
+        self.total_app = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL], server=self.app_flask, url_base_pathname='/dashboard/')
+
+        self.app_main = DispatcherMiddleware(self.app_flask, {})
+
+        self.init_webserver_ui()
+
+    def init_webserver_ui(self):
+        @self.app_flask.route('/')
+        def main():
+            return render_template('index.html')
+
+        # Used in flask template.
+        @self.app_flask.context_processor
+        def get_analyzers():
+            return {'analyzers': self.analyzers}
 
     def init_analyzers(self):
         self.analyzers = {}
         if self.overview:
-            self.analyzers['Uni'] = {'analyzer':UniVariable,'result':None}
+            app_uni = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL], server=self.app_flask, url_base_pathname='/dashboard/Uni/')
+            self.analyzers['Uni'] = {'analyzer':UniVariable,'result':None,'app':app_uni}
         if self.explored_variable is not None:
-            self.analyzers['Bi'] = {'analyzer':BiVariable,'result':None}
+            app_bi = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL], server=self.app_flask, url_base_pathname='/dashboard/Bi/')
+            self.analyzers['Bi'] = {'analyzer':BiVariable,'result':None,'app':app_bi}
         if self.multi:
-            self.analyzers['Multi'] = {'analyzer':MultiVariable,'result':None}
+            app_multi = dash.Dash(external_stylesheets=[dbc.themes.JOURNAL], server=self.app_flask, url_base_pathname='/dashboard/Multi/')
+            self.analyzers['Multi'] = {'analyzer':MultiVariable,'result':None,'app':app_multi}
 
     def init_special_fields(self):
         self.categorical = self.dataframe[self.dataframe.select_dtypes(include = ["object"]).keys()]
@@ -55,7 +77,7 @@ class Yoda:
 
     def prepare(self):
         for analyzer_name in self.analyzers.keys():
-            analyzer = self.analyzers[analyzer_name]['analyzer'](self, self.dataframe).prepare()
+            analyzer = self.analyzers[analyzer_name]['analyzer'](self, self.dataframe, self.analyzers[analyzer_name]['app']).prepare()
             self.analyzers[analyzer_name]['result'] = analyzer
         return self
 
@@ -67,12 +89,13 @@ class Yoda:
         return result
 
     def run_webserver(self, is_async=False):
-        elements = [html.H1('Yoda', style={'textAlign': 'center'})]
+        total_elements = [html.H1('Yoda', style={'textAlign': 'center'})]
         for analyzer_name in self.analyzers.keys():
             html_elements = DataFormatter(self.analyzers[analyzer_name]['result']).get_as_html()
-            elements = elements + html_elements
-        self.app.layout = html.Div(children=elements)
-
+            self.analyzers[analyzer_name]['app'].layout = html.Div(children=html_elements)
+            total_elements = total_elements + html_elements
+        self.total_app.layout = html.Div(children=total_elements)
+        
         if is_async:
             server = threading.Thread(target=self._run_server, args=())
             server.start()
@@ -81,5 +104,4 @@ class Yoda:
                 self._run_server()
 
     def _run_server(self):
-        while True:
-            self.app.run_server(debug=True)
+        run_simple('0.0.0.0', 8050, self.app_main, use_reloader=True, use_debugger=True, threaded=True)

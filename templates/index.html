@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!--<iframe id="ifrm_all" src="/dashboard/" style="width:2000px; height:1200px;" frameBorder="0"></iframe>-->
+    {% for analyzer in analyzers %}
+        <iframe id="ifrm_{{analyzer}}" src="/dashboard/{{analyzer}}/" style="width:2000px; height:1200px; display:none;" frameBorder="0"></iframe>
+    {% endfor %}
+
+    <script>
+        function showIfrm(id) {
+            var iframes = document.getElementsByTagName("iframe");
+            for (var ifrm in iframes) { 
+                if (iframes[ifrm].id == "ifrm_" + id) {
+                    document.getElementById(iframes[ifrm].id).style = "width:2000px; height:1200px; display:block;";
+                } else {
+                    document.getElementById(iframes[ifrm].id).style = "width:2000px; height:1200px; display:none;";
+                }
+            }
+        }
+    </script>
+{% endblock %}

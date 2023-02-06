@@ -6,9 +6,10 @@ import plotly.figure_factory as ff
 import requests
 
 class BiVariable(object):
-    def __init__(self, yoda_env, dataframe):
+    def __init__(self, yoda_env, dataframe, app):
         self.yoda_env = yoda_env
         self.dataframe = dataframe
+        self.app = app
 
     def prepare(self):
         self.func_graphs = []
@@ -36,13 +37,13 @@ class BiVariable(object):
         for func_graph in self.func_graphs:
             elements.append(dcc.Graph(id='fig_' + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), figure=func_graph['fig']))
             elements.append(html.Span(id="example_1 " + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable)))
-            @self.yoda_env.app.callback(Output("example_1 " + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), "children"),[Input('valuable_' + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), "id")])
+            @self.app.callback(Output("example_1 " + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), "children"),[Input('valuable_' + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), "id")])
             def on_button_click(n):
                 requests.request(url=self.yoda_env.feedback_sever + n, method='Get')
             
             elements.append(dbc.Button("New to me", id='new_' + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), color="primary"))
             elements.append(html.Span(id="example_2 " + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable)))
-            @self.yoda_env.app.callback(Output("example_2 " + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), "children"), [Input('new_' + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), "id")])
+            @self.app.callback(Output("example_2 " + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), "children"), [Input('new_' + str(func_graph['func'].__name__) + str(func_graph['counter']) + str(func_graph['column']) + str(self.yoda_env.explored_variable), "id")])
             def on_button_click(n):
                 requests.request(url=self.feedback_sever + n, method='Get')
 
