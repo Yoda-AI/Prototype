@@ -2,20 +2,12 @@
 
 {% block content %}
     <!--<iframe id="ifrm_all" src="/dashboard/" style="width:2000px; height:1200px;" frameBorder="0"></iframe>-->
-    {% for analyzer in analyzers %}
-        <iframe id="ifrm_{{analyzer}}" src="/dashboard/{{analyzer}}/" style="width:2000px; height:1200px; display:none;" frameBorder="0"></iframe>
-    {% endfor %}
+    <iframe id="ifrm_analyzer" src="" style="width:2000px; height:1200px;" frameBorder="0"></iframe>
 
     <script>
-        function showIfrm(id) {
-            var iframes = document.getElementsByTagName("iframe");
-            for (var ifrm in iframes) { 
-                if (iframes[ifrm].id == "ifrm_" + id) {
-                    document.getElementById(iframes[ifrm].id).style = "width:2000px; height:1200px; display:block;";
-                } else {
-                    document.getElementById(iframes[ifrm].id).style = "width:2000px; height:1200px; display:none;";
-                }
-            }
+        function showIfrm(path) {
+            var ifrm_analyzer = document.getElementById("ifrm_analyzer");
+            ifrm_analyzer.src = "dashboard/" + path
         }
     </script>
 {% endblock %}

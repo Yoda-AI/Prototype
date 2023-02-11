@@ -62,3 +62,7 @@ COLUMN_SECTION_MEAN_NZ_RESOLVER = {
 
 # Html
 TITLE_CSS_PROPS = {'textAlign': 'center'}
+
+
+
+RESOLVER = lambda resolver,arg : [resolver[k](*arg) for k in resolver.keys()]

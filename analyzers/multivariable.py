@@ -5,12 +5,11 @@ import dash_bootstrap_components as dbc
 import plotly.figure_factory as ff
 
 from consts import *
+from .analyzer import Analyzer
 
-class MultiVariable(object):
-    def __init__(self, yoda_env, dataframe, app):
-        self.yoda_env = yoda_env
-        self.dataframe = dataframe
-        self.app = app
+class MultiVariable(Analyzer):
+    def __init__(self, yoda_env, dataframe, app, is_sub_analyzer):
+        super().__init__(yoda_env, dataframe, app, is_sub_analyzer)
 
     def prepare(self):
         self.df_mask = round(self.yoda_env.numerical.corr(), 2)

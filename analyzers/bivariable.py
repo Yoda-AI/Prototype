@@ -4,12 +4,11 @@ import pandas as pd
 import dash_bootstrap_components as dbc
 import plotly.figure_factory as ff
 import requests
+from .analyzer import Analyzer
 
-class BiVariable(object):
-    def __init__(self, yoda_env, dataframe, app):
-        self.yoda_env = yoda_env
-        self.dataframe = dataframe
-        self.app = app
+class BiVariable(Analyzer):
+    def __init__(self, yoda_env, dataframe, app, is_sub_analyzer):
+        super().__init__(yoda_env, dataframe, app, is_sub_analyzer)
 
     def prepare(self):
         self.func_graphs = []

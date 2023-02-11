@@ -76,9 +76,17 @@ class Yoda:
         return dataframe
 
     def prepare(self):
+        new_analyzers = {}
         for analyzer_name in self.analyzers.keys():
-            analyzer = self.analyzers[analyzer_name]['analyzer'](self, self.dataframe, self.analyzers[analyzer_name]['app']).prepare()
+            analyzer = self.analyzers[analyzer_name]['analyzer'](self, self.dataframe, self.analyzers[analyzer_name]['app'], False).prepare()
             self.analyzers[analyzer_name]['result'] = analyzer
+            
+            if len(analyzer.sub_analyzers.keys()) > 0:
+                for key in analyzer.sub_analyzers:
+                    new_analyzer = analyzer.sub_analyzers[key]
+                    new_analyzers[f'{analyzer_name}/{key}/'] = {'analyzer':type(new_analyzer),'result':new_analyzer,'app':new_analyzer.app}
+        self.analyzers.update(new_analyzers)
+
         return self
 
     def get_analysis_raw(self):
@@ -93,9 +101,10 @@ class Yoda:
         for analyzer_name in self.analyzers.keys():
             html_elements = DataFormatter(self.analyzers[analyzer_name]['result']).get_as_html()
             self.analyzers[analyzer_name]['app'].layout = html.Div(children=html_elements)
-            total_elements = total_elements + html_elements
+            if not self.analyzers[analyzer_name]['result'].is_sub_analyzer:
+                total_elements = total_elements + html_elements
         self.total_app.layout = html.Div(children=total_elements)
-        
+
         if is_async:
             server = threading.Thread(target=self._run_server, args=())
             server.start()
