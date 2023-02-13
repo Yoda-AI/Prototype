@@ -1,6 +1,6 @@
 # Yoda Prototype
 
-Smooth your way from data to knowledge with Yoda Prototype!
+Smooth your way from data to wisdom with Yoda Prototype!
 
 This exciting Dash app allows you to dive deep into your data and uncover hidden patterns and relationships. With Yoda Prototype, you can easily create uni-variable, bi-variable, and multi-variable visualizations with just a few clicks.
 
